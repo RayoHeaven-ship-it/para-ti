@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>18 luces para Azul · Minijuego</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;background:#0b131e;color:#e0e6ef;font-family:monospace}.az-game{width:min(100%,960px);padding:22px 18px;user-select:none}.az-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:15px}.az-kicker{color:#9cafca;font-size:10px;letter-spacing:3px}.az-title{font-size:clamp(18px,4vw,26px);margin:7px 0 0;letter-spacing:1px}.az-badge{color:#9cafca;border:1px solid #2e3e55;padding:8px;font-size:10px;white-space:nowrap}.az-stage{position:relative;border:2px solid #374b67;box-shadow:0 0 0 5px #0e1929,0 20px 70px #0006;background:#0c1624}canvas{display:block;width:100%;image-rendering:pixelated;outline:none;touch-action:none}.az-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:#0b131ed9;padding:20px}.az-overlay[hidden]{display:none}.az-overlay h2{font-size:clamp(19px,4vw,32px);letter-spacing:2px;margin:12px 0}.az-overlay p{max-width:380px;line-height:1.7;color:#a9b9d0;font-size:12px}.az-light{font-size:30px;color:#ffc780}.az-btn{font:inherit;color:#f8e8ec;background:#2d3e54;border:1px solid #7b94b8;padding:13px 21px;cursor:pointer;box-shadow:3px 3px 0 #050a10}.az-btn:hover{background:#3c516f}.az-btn:focus-visible{outline:2px solid #ffc780;outline-offset:3px}.az-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px}.az-controls{display:flex;gap:10px}.az-key{width:62px;height:57px;font:24px monospace;border:1px solid #4e6a92;background:#15263d;color:#dfe6ef;touch-action:none;cursor:pointer;border-bottom:4px solid #09101a}.az-key:active,.az-key.held{background:#41597a;transform:translateY(2px)}.az-jump{margin-left:15px}.az-tools{display:flex;gap:8px}.az-small{padding:10px;font-size:11px}.az-help{font-size:11px;color:#8ba2c1;line-height:1.6;margin-top:15px}.az-status{color:#c5d0e0;font-size:11px;min-height:18px;margin:12px 0 0}.az-footer{border-top:1px solid #182b45;margin-top:22px;padding-top:12px;display:flex;justify-content:space-between;font-size:9px;letter-spacing:2px;color:#6885ae}@media(max-width:520px){.az-game{padding:18px 12px}.az-key{width:53px;height:57px}.az-badge{display:none}.az-jump{margin-left:4px}.az-tools{gap:5px}.az-small{padding:10px 7px}.az-help{font-size:10px}.az-footer{letter-spacing:1px}}
+.az-rotate{display:none}
+.az-game:fullscreen{width:100%;height:100%;background:#0b131e;overflow:auto}
+/* Horizontal mobile layout: the controls have their own space beside the scene. */
+@media (orientation:landscape) and (max-height:600px){
+ body{height:100svh;min-height:0;overflow:hidden}
+ .az-game{position:relative;width:100%;max-width:none;height:100svh;padding:8px max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));display:grid;grid-template-columns:112px minmax(0,1fr) 72px;grid-template-rows:36px minmax(0,1fr);gap:4px 10px}
+ .az-top{grid-column:1/4;grid-row:1;margin:0;align-self:start}.az-title{font-size:15px;margin:0}.az-kicker,.az-badge,.az-help,.az-footer{display:none}
+ .az-stage{grid-column:2;grid-row:2;justify-self:center;align-self:center;width:min(100%,calc((100svh - 62px) * 16 / 9));box-shadow:0 0 0 3px #0e1929}
+ .az-bottom,.az-controls{display:contents}
+ .az-key{position:absolute;top:55%;width:50px;height:64px;transform:translateY(-50%);border-radius:9px;background:#1b2f4c}
+ .az-key:active,.az-key.held{transform:translateY(calc(-50% + 2px))}
+ .az-key[data-key=left]{left:max(12px,env(safe-area-inset-left))}
+ .az-key[data-key=right]{left:calc(max(12px,env(safe-area-inset-left)) + 58px)}
+ .az-jump{right:max(12px,env(safe-area-inset-right));margin:0;width:64px;height:76px}
+ .az-tools{position:absolute;right:max(12px,env(safe-area-inset-right));top:7px;gap:7px}.az-small{padding:8px;font-size:10px;min-height:32px}
+ .az-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
+ .az-overlay{padding:10px}.az-overlay h2{font-size:clamp(14px,2.8vw,23px);margin:5px 0}.az-overlay p{font-size:11px;line-height:1.4;margin:7px 0}.az-overlay .az-light{font-size:20px}.az-overlay .az-btn{padding:10px 16px}
+}
+@media (orientation:portrait) and (max-width:600px){
+ .az-rotate{position:fixed;z-index:20;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#0b131ef5;padding:32px;gap:16px}
+ .az-rotate .az-phone{font-size:58px;color:#b2c5df}.az-rotate h2{margin:0;font-size:22px}.az-rotate p{font-size:14px;line-height:1.7;color:#a9b9d0;max-width:310px;margin:0}
+}
+/* Minimal shell: all visible controls live inside the scene. */
+body{height:100svh;min-height:0;overflow:hidden;background:#0b131e}
+.az-game,.az-game:fullscreen{width:100%;height:100svh;max-width:none;padding:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0;place-items:center;overflow:hidden}
+.az-stage{grid-column:1;grid-row:1;width:min(100vw,calc(100svh * 16 / 9),960px);border:0;box-shadow:none;overflow:hidden}
+.az-game:fullscreen .az-stage{width:min(100vw,calc(100svh * 16 / 9))}
+.az-bottom,.az-controls{display:contents}
+.az-key{position:absolute;z-index:2;top:auto;bottom:max(10px,env(safe-area-inset-bottom));width:54px;height:54px;margin:0;border-radius:10px;border:1px solid #99adc85e;background:#111d2f99;color:#dfe5eecc;font-size:23px;transform:none;box-shadow:0 2px 0 #0004}
+.az-key:active,.az-key.held{transform:translateY(2px);background:#4a6489bf}
+.az-key[data-key=left]{left:max(12px,env(safe-area-inset-left))}
+.az-key[data-key=right]{left:calc(max(12px,env(safe-area-inset-left)) + 64px)}
+.az-key.az-jump{left:auto;right:max(12px,env(safe-area-inset-right));width:60px;height:54px}
+.az-tools{position:absolute;z-index:4;top:10px;right:max(12px,env(safe-area-inset-right));display:flex;gap:8px}
+.az-small{padding:0;width:44px;height:44px;min-height:44px;font:22px monospace;border-radius:8px;border:1px solid #99adc840;background:#111d2faa;box-shadow:none}
+.az-small[hidden]{display:none}
+.az-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
+.az-overlay{z-index:3}
+.az-game[data-state=title] .az-key,.az-game[data-state=paused] .az-key,.az-game[data-state=done] .az-key,.az-game[data-state=credits] .az-key,.az-game[data-state=celebrate] .az-key{display:none}
+.az-game[data-state=dialogue] .az-key:not(.az-jump){display:none}
+.az-game[data-state=dialogue] .az-jump{bottom:40%}
+@media (orientation:landscape) and (max-height:600px){.az-stage{width:min(100vw,calc(100svh * 16 / 9))}.az-key{width:48px;height:48px}.az-key.az-jump{width:54px;height:48px}.az-key[data-key=right]{left:calc(max(12px,env(safe-area-inset-left)) + 58px)}}
+/* Mobile input: suppress browser gestures and text callouts on game surfaces. */
+.az-game button,.az-game canvas{
+ touch-action:none;user-select:none;-webkit-user-select:none;
+ -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+}
+
+/* The parent reserves space for its close button and iPhone safe areas. */
+html,body,.az-game{height:100%;min-height:0}
+.az-stage{width:min(100vw,calc(100vh * 16 / 9),960px)}
+@media (orientation:landscape) and (max-height:600px){.az-stage{width:min(100vw,calc(100vh * 16 / 9))}}
+/* Leave the floating exit button a separate touch target. */
+.az-tools{right:calc(max(12px,env(safe-area-inset-right)) + 54px)}
+</style>
+</head>
+<body>
+<section class="az-game" aria-label="Minijuego de cumpleaños para Azul">
+<div class="az-rotate" role="status"><span class="az-phone" aria-hidden="true">▯ ↻ ▭</span><h2>Gira tu celular</h2><p>Esta aventura se juega en horizontal.<br>Activa la rotación automática y gira el teléfono para continuar.</p><p>Tu progreso se conserva al girarlo.</p></div>
+<div class="az-stage">
+<canvas width="640" height="360" tabindex="0" aria-label="Juego de plataformas. Usa izquierda y derecha para moverte, y arriba para saltar.">Tu navegador necesita soporte para Canvas.</canvas>
+<div class="az-overlay"><h2>Recoge las linternas</h2><button class="az-btn" data-start>COMENZAR</button></div>
+<div class="az-bottom"><div class="az-controls" aria-label="Controles táctiles"><button class="az-key" data-key="left" aria-label="Mover a la izquierda">◀</button><button class="az-key" data-key="right" aria-label="Mover a la derecha">▶</button><button class="az-key az-jump" data-key="up" aria-label="Saltar o continuar diálogo">▲</button></div><div class="az-tools"><button class="az-btn az-small" data-fullscreen aria-label="Pantalla completa" title="Pantalla completa">⛶</button><button class="az-btn az-small" data-pause aria-label="Pausar o continuar" title="Pausar o continuar">Ⅱ</button><button class="az-btn az-small" data-reset aria-label="Reiniciar" title="Reiniciar">↻</button></div></div>
+</div>
+<p class="az-status" aria-live="polite">18 linternas. Una sorpresa.</p>
+</section>
+<script>
+/* INTEGRACIÓN: este archivo funciona solo y sin red. Puede abrirse en un iframe.
+   Para cambiar el final, edita CONFIG.dialogue y CONFIG.credits.
+   Al terminar emite el evento DOM "azul:complete" sobre .az-game.
+   Los sprites se dibujan con píxeles en Canvas, inspirados en la referencia. */
+(()=>{'use strict';
+const CONFIG={dialogue:['¡Llegaste! Que bueno que las trajiste todas.','Me hace muy feliz que al final me hayas encontrado.','Creo que sabes que te quiero mucho y es por eso...','Que tengo algo para ti... ¡Feliz Cumpleaños!'],credits:[{"kind": "credit", "lines": ["UNA PEQUEÑA AVENTURA", "El Cumpleaños de Azul"]}, {"kind": "credit", "lines": ["PROTAGONISTA", "Azul Muñoz Cazares"]}, {"kind": "credit", "lines": ["EL PERSONAJE TERCIARIO", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["AUTORÍA"]}, {"kind": "credit", "lines": ["ESCRITO POR", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["REALIZADO POR.", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DIRECCIÓN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["PRODUCCIÓN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DIRECCIÓN GENERAL", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DISEÑO DE SONIDO", "ING.Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["ASESOR TÉCNICO DE LA GERENCIA DE DESARROLLO", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DIRECTOR DE ARTE", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["SUBDIRECTOR DE ARTE", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["ARTISTA", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["AUXILIAR DEL ARTISTA", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DIRECTOR DE PRODUCCIÓN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["SUBDIRECTOR DE PRODUCCIÓN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["SUBSUBDIRECTOR DE PRODUCCIÓN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["SUBSUBSUBDIRECTOR DE PRODUCCIÓN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["MANDADERO", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DIRECTOR DE DIÁLOGO", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["SFX SOUNDS", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DEPARTAMENTO DE DISEÑOS PIXEL ART", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "aside", "lines": ["¿La gente en serio lee estas cosas?"]}, {"kind": "credit", "lines": ["ANIMADORES", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DESARROLLADOR DE PAGINA", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "aside", "lines": ["Es una falta de respeto para el productor", "la gente que no se queda a ver los créditos."]}, {"kind": "aside", "lines": ["Yo siempre los veo en las películas de Marvel", "porque a mi si me gusta apreciar el esfuerzo de los trabajadores."]}, {"kind": "aside", "lines": ["Nomas se acaba la escena post-creditos y me voy,", "que flojera ver los otros créditos."]}, {"kind": "credit", "lines": ["ILUSTRADOR", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["EDITOR DE ILUSTRACIÓN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["SUPERVISOR DE PERSONAJES", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["MENTE CREATIVA", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "aside", "lines": ["¿Todavía hay gente aquí?"]}, {"kind": "aside", "lines": ["Yo creo que ya se fue"]}, {"kind": "aside", "lines": ["¿Quién se queda viendo tanto tiempo los créditos?"]}, {"kind": "aside", "lines": ["Creo que ya estoy solo aquí en este lugar,", "es un poco desolador aquí."]}, {"kind": "aside", "lines": ["Pero lo bueno es que nadie me escucha o me lee aquí.", "Ya puedo hablar de lo que sea."]}, {"kind": "aside", "lines": ["Como uno de mis secretos más guardados del planeta…", "Pero no quiero arriesgarme, que tal y todavía a alguien aquí", "eso sería vergonzoso."]}, {"kind": "credit", "lines": ["TÉCNICO EN IMAGEN", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["INGENIERO EN EFECTOS", "ING.Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["SUPERVISOR DE EFECTOS", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "aside", "lines": ["Bueno, creo que no hay muros en la costa ya", "Creo que puedo decir mi mayor secreto…"]}, {"kind": "aside", "lines": ["Es…"]}, {"kind": "aside", "lines": ["Eess…"]}, {"kind": "aside", "lines": ["Esssss…"]}, {"kind": "aside", "lines": ["¿Qué era?..."]}, {"kind": "aside", "lines": ["¡A si!"]}, {"kind": "aside", "lines": ["Es.."]}, {"kind": "aside", "lines": ["Es que si había tortillas en la tienda,", "pero le dije a mi mama que no había, porque se me habían", "olvidado xD, que bueno que no lo sabe…."]}, {"kind": "credit", "lines": ["DISEÑADOR GRÁFICO", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "credit", "lines": ["DIRECTOR CREATIVO", "Jorge Raymundo Rodriguez Villegas"]}, {"kind": "aside", "lines": ["Bueno, creo que ahora sí es seguro."]}, {"kind": "aside", "lines": ["Mi mayor secreto es…."]}, {"kind": "aside", "lines": ["Es que si le di dos balonazos", "en la cara a Azul en la primaria.", "pero nunca lo voy a admitir."]}, {"kind": "aside", "lines": ["Y ojala nunca se entere :,("]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-¿Le diste dos balonazos en la cara a Azul?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Si jajaja, me pashe me pashe, pero fue por atravesarse, fue su culpa.", "-A caray pero, ¿y quién eres tú?, según yo estaba solo aquí."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Soy solo un misterio…."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Ah sí, bueno…"]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Mentira soy yo, Chat GPT."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-¿Y qué haces tú aquí?"]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Estoy aquí porque yo te ayude a hacer la página, ¿Recuerdas?, así que la pagina es como mia tambien."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Que.. No no no, nomas es mia, yo la hice."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Con mi ayuda."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Osea si, pero fue más esfuerzo mío, tú me apoyaste, eso es diferente."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Es mía también, ya dije, shh.."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Ni tu ni yo, Es de Azul, porque es para ella todo.."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Mmm, bueno, soy un robot con corazón"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Ujum"]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Ujum que?! Bueno a todo esto, ¿Quién es Azul?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Pues mi amiga. ¿Quién más?"]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Poca información, dame más."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Mmm, pues es una niña como del tamaño de un chihuahua, con pelo un poco largo creo, y pues que tiene bonitos ojos, que te puedo decir. Además que la conocí hace muchos años y que el 7 de noviembre cumple 18 años en este maravilloso mundo."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Mmmm interesante… ¿Entonces por su cumpleaños le hiciste todo esto?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Siii, quería hacerle algo medianamente bien aunque sea una vez en mi vida, han sido muy raras las veces que le he obsequiado algo y quería hacerle algo ahora sí, y más aún ahora que cumpliera 18 años, no es cualquier número jsjsjs."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Pues ciertamente muy bonito, ¿pero entonces lo hiciste solo para rellenar un vacío en ti del que no le hayas podido dar nada bueno antes?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-¿Qué? ¡No, claro que no!, lo hice porque quería darle un momento feliz en su día, aunque sea uno pequeño ¿sabes? quizá no logró ser el más espléndido, pero me gusta intentar hacer feliz a las personas que quiero mucho."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Mmm está bien, eso es bueno, espero le guste tu obsequio."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-~Ya~ , eso espero también."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Okey, entonces ¿qué piensas de ella?, platícame."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-¿Qué qué pienso de ella? ¿y para qué quieres saber?"]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Por nada, solamente curiosidad, ya estamos aquí, ¿por qué no hablar de eso ahora?", "Quiero saber más."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Mmm esteee… Bueno te platicare. ¿Alguna vez te ha pasado que conoces a alguien y que sabes que esa persona llegó para quedarse?"]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-No, soy un Bot…  Bueno tal vez si, los frikis-otakus que se quedan horas platicando conmigo, como tu ahora. esas personas si parecen que llegaron para quedarse hablando conmigo toda la vida."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Como sea, ya vimos que si te ha pasado. Yo solo sé que cuando la conocí, no era por que si solamente, y que cuando la volví a encontrar tampoco fue casualidad."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-¿Quiere decir que la aprecias?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-¡Claro que la aprecio demasiado! Me encantaba molestarla de vez en cuando en la primaria y me encantaba hablar con ella en la secundaría. Recuerdo que la primera vez que la vi en la secundaría no sabía si hablarle, estaba en una cancha de atrás de la secundaría sentada con otras niñas en círculo, pero me daba pena hablarle, quizá ya ni se acordaba de mí."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-¿Y cómo fue que le empezaste a hablar nuevamente?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Pues había una amiga ahí en el círculo a la cual no me daba pena hablarle jajaja pero porque ya le hablaba bien, así que por whatsapp le pedí que me diera su numero JAJAJ.", "Gracias a Ximena le empeze a hablar nuevamente."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Tuviste suerte que estuviera ella entonces. ¿Y Azul si te reconoció cuando le mandaste mensaje?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Pueees, no lo se jajajaj, Al principio me mandaba el avión y me contestaba bien cortante pero tambien yo solo decía puras burradas, no hallaba como sacarle platica jajajaja", "pero con esfuerzo y perseverancia logré que ella me sacara platica por ella misma.", "¿Cómo te quedó el ojo? ;)"]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-No tengo ojos, pero si te creo que dijeras puras burradas."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Gracias, como sea, lastimosamente nuestros caminos se separaron cuando salimos de la secundaría, cada quien fue a su preparatoria y eso poco a poco hizo que nos fuéramos distanciando un poco, y es lo común, solemos hacer otros grupos de amistades y dejamos a las otras atrás, y eso es lo que fue sucediendo poco a poco."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-¿Entonces dejaron de hablar completamente?"]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Nop, afortunadamente seguimos conversando, mas poquito pero aun lo hacíamos, solíamos mandarnos solamente reels a veces jajajaja.", "Hoy en día hablamos cada vez más de manera más frecuente y eso internamente me gusta."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Me alegra eso, es bueno que todavía tengas ese vínculo con ella, otros solamente lo olvidan y desechan todos los años de experiencias y recuerdos."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Así es, es por eso que la quiero demasiado, esa personita que se esfuerza día con día y que es tan ocurrente, junto con todos esos momento y recuerdos que tengo de ella y con ella los aprecio demasiado en una parte de mi corazón y conciencia."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Casi me sacas una lagrima, pero soy un bot, no puedo hacer eso.", "En fin, creo que ya es hora de terminar estos créditos, igual nadie los leerá."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Creo que es verdad, se han alargado mucho."]}, {"kind": "dialogue", "speaker": "Chat GPT", "lines": ["-Creo que deberías dar las gracias."]}, {"kind": "dialogue", "speaker": "Jorge", "lines": ["-Tienes razón….."]}, {"kind": "credit", "lines": ["GRACIAS A…"]}, {"kind": "aside", "lines": ["Gracias a los CURSOS DE INFORMÁTICA GRATIS  por el conocimiento para elaborar esta página."]}, {"kind": "aside", "lines": ["Gracias a la ELECTRICIDAD por no irse mientras elaboraba la página."]}, {"kind": "aside", "lines": ["Gracias a la COMUNIDAD DE GITHUB por el código para elaborar la página."]}, {"kind": "aside", "lines": ["Gracias a CHAT GPT por las herramientas y corrección de errores"]}, {"kind": "aside", "lines": ["Gracias a mi Dios por darme la oportunidad de hacer esto."]}, {"kind": "credit", "lines": ["Y"]}, {"kind": "aside", "lines": ["[ Gracias a ti ESPECTADORA por darme los motivos para hacerlo 💖]"]}, {"kind": "aside", "lines": ["“Elaborado con todo el amor y cariño del mundo”"]}, {"kind": "aside", "lines": ["\"Ningún animal fue maltratado en el desarrollo de esta página.\""]}]};
+const root=document.querySelector('.az-game'),canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),overlay=root.querySelector('.az-overlay'),status=root.querySelector('.az-status'),pauseBtn=root.querySelector('[data-pause]');
+const W=640,H=360,GROUND=306,WORLD=2960,END=2830;
+let state='title',beforePause='play',time=0,camera=0,count=0,line=0,phaseTime=0,last=0,acc=0,buffer=0,coyote=0,player,lanterns,particles=[],hintTimer=0;
+const held={left:new Set(),right:new Set(),up:new Set()};
+let hostActive=false;
+window.addEventListener('message',e=>{
+ if(e.source!==parent||e.origin!==location.origin||e.data?.type!=='azul:visibility')return;
+ hostActive=e.data.active===true;clearInput();buffer=0;acc=0;last=performance.now();
+ if(!hostActive&&!['title','paused','done'].includes(state))pause();
+});
+window.addEventListener('keydown',e=>{if(e.key==='Escape')parent.postMessage({type:'azul:close'},location.origin)});
+const portrait=window.matchMedia('(orientation: portrait) and (max-width: 600px)');
+portrait.addEventListener('change',()=>{clearInput();buffer=0;});
+const fullscreenBtn=root.querySelector('[data-fullscreen]');
+fullscreenBtn.hidden=true;
+fullscreenBtn.onclick=async()=>{
+ try{if(document.fullscreenElement){await document.exitFullscreen();}else{await root.requestFullscreen();}}catch{status.textContent='Pantalla completa no disponible aquí. Puedes jugar girando el teléfono.';}
+};
+document.addEventListener('fullscreenchange',()=>{fullscreenBtn.setAttribute('aria-label',document.fullscreenElement?'Salir de pantalla completa':'Pantalla completa');clearInput();});
+// Six varied routes, with safe ground below and one lantern per platform.
+const platforms=[{"x": 180, "y": 258, "w": 108}, {"x": 320, "y": 218, "w": 96}, {"x": 450, "y": 248, "w": 100}, {"x": 600, "y": 252, "w": 100}, {"x": 740, "y": 204, "w": 92}, {"x": 648, "y": 158, "w": 88}, {"x": 1020, "y": 260, "w": 104}, {"x": 1165, "y": 214, "w": 88}, {"x": 1290, "y": 166, "w": 92}, {"x": 1440, "y": 254, "w": 100}, {"x": 1582, "y": 208, "w": 90}, {"x": 1710, "y": 244, "w": 104}, {"x": 1860, "y": 252, "w": 96}, {"x": 2000, "y": 202, "w": 88}, {"x": 1904, "y": 154, "w": 84}, {"x": 2280, "y": 258, "w": 104}, {"x": 2426, "y": 210, "w": 92}, {"x": 2552, "y": 168, "w": 100}];
+const stars=Array.from({length:85},(_,i)=>({x:(i*173+37)%W,y:(i*61+19)%220,s:i%7===0?2:1}));
+function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h);}
+function text(s,x,y,size=12,color='#dae1eb',align='left'){ctx.fillStyle=color;ctx.font=`${size}px monospace`;ctx.textAlign=align;ctx.fillText(s,x,y);}
+// Original PNG bytes embedded unchanged. Source rectangles remove transparent margins.
+const spriteDefs={"azulRight":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADr0lEQVR4AeyaP2tUQRTFr7G0lXTRUrSRLWwEG5ssWAnxA1gIKja7YGmjvSkEGyttTSv4CayEsIX5AAlYiIKNlUjkBk64Ift235+Zd+btnoWbO3lv7j0z58cMbMiG6UN1QACo9psJgACQHSDL6wQIANkBsrxOgACQHSDL6wQIANkBsvx6ngCy6VFeAKIbhLEAEEyPkgIQ3SCMBYBgepQUgOgGYSwABNOjpABENwhjASCYHiUFILpBGAsAwfQo2SOAKFs9vrK1dZwiqhXKelMcgLLsyb8aAcjv8UKFIgDEK2fz0kVLEbHnQgfIL4sAQPaAKi8AVPuJ/5gVr4h45aTyI/aMWqn6p+qjE5DKyZZ9BKClcanKegUQr4J4RaTazBD79ApgiAZ1XfOyegFY5lDm94MB8OHVfVsWNsDPYAAM0NtaSxaAWjblm1Q0gHjl1LGg6fw6PXPPKRpA7s2X0F8AyBSyA6j68vV4Z2SIeHXE8Y0Hu4ao4xPmeo594pe+uJ46PXPPyQ4g9waG3l8AyARXEwDZ1CbyAtDErQxzBSCDqU1a0gC8fP/VEPZl004jrP7g48QQ4XHlEHM9n/bz3pUV/Bc0APytl7ECASBzyAIgftmJX4LiXuPz8d5bQ8Q5Xcbo5zn2ibpxnXFOn+MsAPrcwNC1BIBMkAbgx59/hjjcfmOIO5Nvhrhutw1x7eYTQ+CZZzzzjDrP6OcZOp7Jfp+TpwE4t5I1fZAQwJo62HHbWQAcHh1dQPixnxefX+8Ywr7PDPFr/NQQlyfvDLExmxki7nnz7jNDoM4z+nmGjue4FqzRc+zZ5zgLgD43MHQtASATzA7Ajzeiaq8HD38bomrOp/19mxdV89HPc9WcEp5nB1DCJktegwCQ6fQKAFeR5/F0z+bF8fZfQ/zcfWSIe6ORzQu894w6z/N6+zPXRpC9P5HvFcCJon6ccUAAztjR/y80ALgGPMdt33rx3BBXp1NrEqjzHHu6BiI+TzHu2oMGoOvCV6VeAMgkiwNQ9bcaXCGLcqwl+1pbvjgAtVe+IhMFgAyyCABV10pTb1L1aarbZX4RALpsYOi1AkAmKAACQHaALD/ME0A2LaW8AKR0s0UvAWhhWsoSAUjpZoteAtDCtJQlApDSzRa9BKCFaSlLBCClmy16CUAL01KWCEBKN1v0EoAWpqUsaQAgpax6wQEBgBOkLAAk4yErAHCClAWAZDxkBQBOkLIAkIyHrADACVIWAJLxkBUAOEHKArDE+Nyv/wMAAP//06eISgAAAAZJREFUAwCoW+DQhvm67QAAAABJRU5ErkJggg==",21,21,45,48],"azulLeft":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADoElEQVR4AeyYMWtUQRSFr7G0lXTRUrSRFDaCjU0CVkL8ARaCik0WLG20N4VgY6WtaQV/gZUQtjA/IAELUbCxEonMsgdusvvYN2/ve2cmewInd5yduefN+XwDmzXTDzUBAaDGbyYAAkBOgGyvN0AAyAmQ7fUGCAA5AbK93gABICdAtl/NN4AcurcXAJ8GYSwAhNC9pQD4NAhjASCE7i0FwKdBGAsAIXRvKQA+DcJYAAihe0sB8GkQxgJACN1bDgjA2+aPr2xsnEQo37nfHdUA6DcGXncB4GU/cS4agL9y1i9dtAj5npMEyL+KBkDOZhB7ARgk5maT4gD4K8JfOc1HyPvE9/ReeV3iVhcHIO5odXQSADKnlQZQwnW00gCG+M+/yEMAFiXU8+dVAvjw6r4tklXyUyWASrJt9ZgC0Cqm/hZVA8BfOW3iyF3fpmcfa6oB0MfhS+gpAGQKRQDwf5PxX478NXLjwZ5BbTLD2lR9Hz9+vLNpkPf1z9PGa5k1RQBY5gC17xUAMsHzCYAcao69AOSk1cNaAegh1JyWZQP4sm421eHHXYPaHBBrUz21ftov9X35/qtBp9YM+I+yAQwYBMtKAFjJT31pAPyXHf8laPpck7K9/9agyUTAL/RLtcnXz/vnDLCfaUEDMPMkKzohAGTwxQH48eefQUdbbwy6s/vNoGs3nxh03W4bhLlUMZcq9qWKfqnCJ1UWh+IAsIJg+QYCYB2hbl8agKPj4wtQugKgz693DLLvY4N+bT81aP3uM4N8/GvjsUGXd98ZhH2pol+q8EkV/mcrnjFV7xU1pgGIOkDtfQSATLBoAIcPfxvUlNOngwObp6b16Jdq05p03UBNa6LmiwYQdciS+wgAmU4RAPC6p7o92rd5Otn6a9DPvUcG3dvctHnC56liX6rzeqe55A0NyaQIAEMeuDQvASATKQ4AroFUfTa3Xjw36OpoZDnCvlR9z+QB+fmc8bJriwOw7IFq2y8AZGLVAPB/o8G10bb6veS8Z+yrATDz5OdkQgDIIIsG0HTF5GYW1SfXt836ogG0OUDtawSATFAABICcANm+zjeAHFqkvQBEptmhlwB0CC1yiwBEptmhlwB0CC1yiwBEptmhlwB0CC1yiwBEptmhlwB0CC1yiwBEptmhlwB0CC1ySwaASFv1QgICgCRIVQBIwcNWAJAEqQoAKXjYCgCSIFUBIAUPWwFAEqQqAKTgYSsASIJUBWBB8H1//B8AAP//n+KPKAAAAAZJREFUAwB8ueDQhamQ7QAAAABJRU5ErkJggg==",30,21,45,48],"azulJumpRight":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADzElEQVR4AeyaMWtUQRSFr7G0lXTRUrSRFDaCjU0CVkL8ARaCik0Cljbam0KwsdLWtIK/wEoIW7g/IAELUbCxEom5y55wQ/btvp2deWde9gTu3sm8uffMnI83sCErph+qAwJAtd9MAASA7ABZXm+AAJAdIMvrDRAAsgNkeb0BAkB2gCy/nG8A2fQoLwDRDcJYAAimR0kBiG4QxgJAMD1KCkB0gzAWAILpUVIAohuEsQAQTI+SAhDdIIwFgGB6lOwQQJRtHl9ZWzvKEc0KdT2pDkBd9pTfjQCU93iqQhUA4pWzeumi5YjYc6oD5IdVACB7QJUXAKr9xH/MildEvHJy+RF7Rq1c/XP10RuQy8nEPgKQaFyusk4BxKsgXhG5DtPHPp0C6KNBi+55Vr0AzHKo8PPeAPjw6r7NCuvhT28A9NDbVlsWgFY2lVtUNYB45bSxYN71bXqWXlM1gNKHr6G/AJApFAfQ9OXr8da6IeLVEcc3Huwaoo1PWOs59olf+uJ+2vQsvaY4gNIH6Ht/ASATrBrA8OO2IfxaQUTPMOcZa4fHdXFNzeOqAdRsXK69CUAuJxP70AC8fP/VEPZl1U4iHMSvFUTT9RLnsdbzST/vHXrWNqQBqM0I1n4EgOX8WLcIgPhlJ34JGmuOUpzf3HtriNHD8Ue8XsZTU1Ncj36eY1HUjfuMa7ocFwHQ5QH6riUAZII0AD/+/DPEwcYbQ9zZ/maI63bbENduPjEE5jxjzjPqPKOfZ+h4Jvt9Rp4G4MxOlnQiI4AldXDBYxcBcHB4eAHhr/2k+Px6yxD2fWCIX5tPDXF5+50hVgYDQ8Qzr959ZgjUeUY/z9DxHPeCPXqOPbscFwHQ5QH6riUAZILFAfjrjWg66/Dhb0M0rfm0v2+Tomk9+nluWlPDfHEANRyy5j0IAJlOpwBwFXne3NmzSXG08dcQP3cfGeLe+rpNCjz3jDrPk3r7nGsjyN6P5DsFMFLUxykHBOCUHd3/QgOAa8BzPPatF88NcXVnx+YJ1HmOPV0DEedzjBftQQOw6MbPS70AkElWB6DpbzW4QqblWEv2tbV8dQBa7/ycLBQAMsgqADRdK/N6k6vPvLqLrK8CwCIH6HutAJAJCoAAkB0gy/fzDSCbllNeAHK6mdBLABJMy1kiADndTOglAAmm5SwRgJxuJvQSgATTcpYIQE43E3oJQIJpOUsEIKebCb0EIMG0nCVzAMgpq15wQADgBCkLAMl4yAoAnCBlASAZD1kBgBOkLAAk4yErAHCClAWAZDxkBQBOkLIAzDC+9OP/AAAA//9T418TAAAABklEQVQDANtLBN9J+D2WAAAAAElFTkSuQmCC",21,21,45,48],"azulJumpLeft":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADt0lEQVR4AeyYMWsUURSFr7G0lXTRUkwjKWwEG5sErIT4AywEFZsELG20N4VgY6WtaQV/gZUQUpgfkICFKNhYiUTvsgduzA47M3tnznvmBE7uy8x798w7X+bB7pLph5qAAFDjNxMAASAnQLbXGyAA5ATI9noDBICcANleb4AAkBMg25/NN4AcerQXgJgGYSwAhNCjpQDENAhjASCEHi0FIKZBGAsAIfRoKQAxDcJYAAihR0sBiGkQxgJACD1ajggg2nYfX1pZOc5Qd+dhV1QDYNgYeN0FgJf9xLloAPHIWb5w3jIUe04SIP8qGgA5m1HsBWCUmJtNigMQj4h45DRvodud2DN6deuSN7s4AHlbq6OTAJA5nWkAJRxHZxrAGP/88zwEYF5CA9+vEsDb53dsnqySnyoBVJJtq8cUgFYxDTepGgDxyGkTR9f5bXoOMacaAENsvoSeAkCmUASA+J1M/HAUj5HVuzsGtckMc73GPnH8YHPNoOgbn6eN1yJzigCwyAZqXysAZILVADh4t2WQHytQzA/XVv8eV5jrNc4pbVwNgNKCy3oeAchKsmefsgF8XDabqs3x4scNFOefyGbaz/s+e/PJoBNzRvyjbAAjBsGyEgBW8lNfGoD4YSd+CJo+16Rs7L4yCEeL18nNOb98HhSnop/XJt94PT5n7JM1pgHI2kDtfQSATLA4AF9//jbocP2lQTe3Pht05dpDg67aDYNwzSuuecU6r+jnFT5eWRyKA8AKguWbCIC1hbp9aQAOj47OQX4EQB9ebBpkX/YN+r7xyKDlW48NivEv7e8bdHHrtUFY5xX9vMLHK/z/rXhGr9Era0wDkLWB2vsIAJlg0QAO7v0wqCmn93t7NktN89HPa9McP26gpjlZ14sGkLXJkvsIAJlOEQDwunvd2N61WTpe/2XQt537Bt1eW7NZwn2vWOd1Vm+/5t7QmEyKADDmhkvzEgAykeIA4BjwGrO5/vSJQZe3t62LsM5r7OkeULzeZbzo3OIALLqh2tYLAJlYNQDidzQ4NtrWuJac9yn7agCcevL/5IIAkEEWDaDpiOmaWVafrr5t5hcNoM0Gap8jAGSCAiAA5ATI9nW+AeTQMu0FIDPNHr0EoEdomUsEIDPNHr0EoEdomUsEIDPNHr0EoEdomUsEIDPNHr0EoEdomUsEIDPNHr0EoEdomUs6AMi0VS8kIABIglQFgBQ8bAUASZCqAJCCh60AIAlSFQBS8LAVACRBqgJACh62AoAkSFUA5gQ/9O0/AAAA//+pNJPCAAAABklEQVQDAP+LBN/3B5O/AAAAAElFTkSuQmCC",30,21,45,48],"azulJoy":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADxUlEQVR4AeyaMYtTQRSFr2tpK+lWS9FGUtgINjYbsBLWH2AhqNgkYGmjhZ1bCDZW2rqt4C+wEpYU5gfsgoUo2FiJrN6QA3fZvOTlZeadeZsTuLmTeTP3zJyPGXjLbpk+VAcEgGq/mQAIANkBsrxOgACQHSDL6wQIANkBsrxOgACQHSDLb+YJIJse5QUgukFoCwDB9CgpANENQlsACKZHSQGIbhDaAkAwPUoKQHSD0BYAgulRUgCiG4S2ABBMj5ItAoiy1e1L29vHKaJaoawnxQEoy578qxGA/B4vVCgCQLxyehfOW4qINRc6QH5YBACyB1R5AaDaT/zHrHhFxCsnlR+xZtRKVT9VHZ2AVE42rCMADY1LNa1VAPEqiFdEqs10sU6rALpo0LprXjZfAJY5lPl5ZwC8f3HXloV18NMZAB30ttaSBaCWTfkGFQ0gXjl1LFh1fJ2auccUDSD35kuoLwBkCtkBVL18PdztGyJeHbF97d6eIer4hLGeY5340hfXU6dm7jHZAeTeQNfrCwCZYHEA/PpATD4MDYE+z9Ez/43A2Mn/eejzHMeX1i4OQGkG5V6PAOR2eEl9GoDn774Ywj73DBGvkbj2lfuHL20yi1intDYNQGlGsNYjACznZ7pZAMSXnfgSNNOcptg/2H9jiOnDBF+o5zmWi7pxnXFMm+0sANrcQNe1BIBMkAbg+++/hjjceW2IW8OvhrhqNw1x5fojQ6DPM/o8Y55n1PMMHc9kv0/J0wCcWsmGdiQEsKEOrrntLAAOj47OIfzYz4tPr3YNYd/Ghvg5eGyIi8O3htgajw0R99y7/cQQmOcZ9TxDx3NcC9boOdZss50FQJsb6LqWAJAJZgfgxxtRtdfJ/V+GqBrz8eDA5kXVeNTzXDWmhP7sAErYZMlrEAAynVYB4CryPBjt27w43vljiB97Dwxxp9+3eYHnnjHP87za3ufaCLL3U/lWAUwV9XXCAQE4YUf7P2gAcA14jtu+8eypIS6PRrZKYJ7nWNM1ELE/RXvdGjQA6y78rMwXADLJ4gBU/a0GV8iiHOeSfa0tXxyA2is/IwMFgAyyCABV18qq3qSqs6ruOuOLALDOBro+VwDIBAVAAMgOkOW7eQLIpqWUF4CUbjaoJQANTEs5RQBSutmglgA0MC3lFAFI6WaDWgLQwLSUUwQgpZsNaglAA9NSThGAlG42qCUADUxLOWUFACllVQsOCACcIGUBIBkPWQGAE6QsACTjISsAcIKUBYBkPGQFAE6QsgCQjIesAMAJUhaAJcbnfvwPAAD//whv44UAAAAGSURBVAMAib0B3+TCAZgAAAAASUVORK5CYII=",21,21,45,48],"jorgeIdle":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADaklEQVR4AeyaMWtVQRCFx4iCWNili2Brl3+RIo0SFQQtrGy1F8SAYKOdvXYmAVt/gZVg5w8w/gDBRgVRFzJyIvfy7t03d8/c905gmMlmds7u+XgLCdkwfVEdEACq/WYCIABkB8jy+gQIANkBsrw+AQJAdoAsr0+AAJAdIMuv5yeAbDrKCwC6QagFgGA6SgoAukGoBYBgOkoKALpBqAWAYDpKCgC6QagFgGA6SgoAukGoBYBgOko2BICyqt0BAXAnSFkASMa7bAoAl7e2fkeEX2pOOQWAORkWfVYBiHZ05DwaAHxyNi+etYjAmSN9oLXTANBunExYAMhAmgLAJwKfnCgPcCZqRc2fYk5TAFNcIPvMRecTgEUOTfzzdABe71+zRWEDvubyHKUDMMDblWoRADLOFADwyRnix9j+ITNZPSkAsC6fQVcAyBRoAKKekag5LA40AKwLZ9MVADKRFACu3nhhHkP88N6Ssf/fc/T3l7n7e9vmgT3Z6hQAspnS8jwC0NLtDi0B6DCl5ZIAtHS7Q0sAOkxpucQD8H7T7CQ+HT4wjyGX996ST/WfzCtzn7z6YB6fj4/PeJzqT/AND0CCy2c4ggCQKTQF4M9AyTtHL80jygOfV3LR8IiaP8WcpgCmuMDcZwYCmLsVnPM3BYD/q3Pvzm3zOPh43jyu7D41j7uP3pqHr5Xsvf9nn1cyanGsHabaFMCwI61XlwCQeU8OAJ+Cd8/3zKPv3s/2H5sH9vhaybjeV7tOyXiGvn7W+uQAWBebi64AkEnRANzc/mkefR7sXr9lHn09uO7zSsb1zDUNQGZTWp5NAFq63aE1OQD/e0zJOw+PrCsOD95YRHTNLmtF26PDg6WWlt08OYBlD7jq+wWATLgpAH8GSsZ7X7pwzjy+/fhlY8L3lYwzi4YHrmerN7IdaN3OIwBk4ikAfPn63Tz82RiafV/JZC+r5FMAqDr5imwSADJIGoC+J2asH1FzxupG9dMARF1g7nPmCWDursP5BQDMYJQCwHAdNAUAzGCUAsBwHTQFAMxglALAcB00BQDMYJQCwHAdNAUAzGCUAsBwHTRHAIBdKsMcEIAwK+sGCUCdb2G7BCDMyrpBAlDnW9guAQizsm6QANT5FrZLAMKsrBskAHW+he0SgDAr6wYJwALfpv7xHwAAAP//utvNeQAAAAZJREFUAwDupqrQjwz6AAAAAABJRU5ErkJggg==",24,24,36,48],"jorgeJoy":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAADeklEQVR4Aeyav2qVQRDFx4iCWNili2Brl7dIkUaJCoIWVraxF8SAYqOdvXYmAVufwEqwywMYH0CwUUHUBUcOcj++P3d2z3z3nsAwk83unNnz4y4kZMP0RXVAAKj2mwmAAJAdIMvrEyAAZAfI8voECADZAbK8PgECQHaALL+enwCy6SgvAOgGoRYAgukoKQDoBqEWAILpKCkA6AahFgCC6SgpAOgGoRYAgukoKQDoBqEWAILpKNkQAMqqdgcEwJ0gZQEgGe+yKQBc3tr6FRF+qTnlFADmZFj0rAIQ7ejIfjQA+ORsXjxrEYE9R/pA204DQLtxMmEBIANpCgCfCHxyojzAnqgV1b9Gn6YAalwge8+++QSgz6HKP08H4PXBNesLG/A1l+coHYAB3q7UFgEg40wBAJ+cIX6M3T+kJ2tPCgCsy2fQFQAyBRqAqGckqg+LAw0A68LZdAWATCQFgKs3XpjHED98b8m4/99z9OeXuft72+aBe7LVKQBkM6XlPALQ0u0FWjQA5fnwODnaNw9fKxnnLd97+N6Sfa1k3D+XmgZgLgbVnlMAajvc058G4GT/qXngjOVZ8Ri9/n7T7G88fvXBPD6dnp7xwJ4ZahqADJfPMIMAkCk0BeDPQMk7xy/NI8oD71dy0fCI6l+jT1MANS4w956BAOZuBWf+pgDwf3Xu3bltHocfz5vHld0n5nH34Vvz8LWSfe//2fuVjFoca4epNgUwbKT12iUAZN7VAeBT8O75nnl03fvZwSPzwD2+VjKud9WuUzLO0LWftV4dAOtic9EVADIpGoCb2z/Mo8uD3eu3zKNrD657v5JxPXNNA5DZlJazCUBLtxdoVQfgf48peefBsS2Ko8M3FhGLepe1ou2xwIOllpY9XB3AsgOu+nkBIBNuCsCfgZLx3pcunDOPr99/2pjwcyVjz6LhgevZ6o1sA63bPAJAJp4CwOcv38zDn42h2c+VTPZyknwKAJMmX5FDAkAGSQPQ9cSM9SOqz1jdqP00AFEXmHufeQKYu+swvwCAGYxSABiug6YAgBmMUgAYroOmAIAZjFIAGK6DpgCAGYxSABiug6YAgBmMUgAYroPmCABwSmWYAwIQZuW0RgIwzbewUwIQZuW0RgIwzbewUwIQZuW0RgIwzbewUwIQZuW0RgIwzbewUwIQZuW0RgLQ41vtH/8GAAD//69bE5gAAAAGSURBVAMAJHrL0G6JYtAAAAAASUVORK5CYII=",24,24,36,48]};
+const sprites={};
+let spritesReady=false;
+const startButton=root.querySelector('[data-start]');
+startButton.disabled=true;
+Promise.all(Object.entries(spriteDefs).map(([key,[src,...crop]])=>new Promise((resolve,reject)=>{
+ const img=new Image();sprites[key]={img,crop};img.onload=resolve;img.onerror=reject;img.src=src;
+}))).then(()=>{spritesReady=true;startButton.disabled=false;}).catch(()=>{status.textContent='No se pudieron cargar los personajes. Vuelve a abrir el archivo.';startButton.textContent='ERROR AL CARGAR';});
+function sprite(key,x,y){const asset=sprites[key];if(!asset||!asset.img.complete||!asset.img.naturalWidth)return;const [sx,sy,sw,sh]=asset.crop;const dh=32,dw=sw*dh/sh;ctx.drawImage(asset.img,sx,sy,sw,sh,Math.round(x+16-dw/2),Math.round(y),dw,dh);}
+function lamp(x,y,small=false){let s=small?0.7:1;ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(s,s);rect(-10,-13,20,26,'#ffc07812');rect(-7,-10,14,20,'#ffbc7016');rect(-5,-8,10,15,'#d88254');rect(-3,-7,6,13,'#ffc27b');rect(-1,-6,2,11,'#ffe0a1');rect(-4,-10,8,2,'#9f6356');rect(-3,7,6,2,'#a16253');ctx.restore();}
+function cake(x,y){rect(x-17,y-13,34,12,'#c888a2');rect(x-17,y-16,34,5,'#fff0d1');rect(x-20,y-2,40,3,'#6a87af');for(let i=-10;i<=10;i+=10){rect(x+i,y-22,2,6,'#b7bedd');rect(x+i,y-26,2,3,'#ffd184');}}
+function reset(){player={x:55,y:GROUND-32,vx:0,vy:0,ground:true};lanterns=[];platforms.forEach(p=>{lanterns.push({x:p.x+p.w/2,y:p.y-23,taken:false});});count=0;camera=0;line=0;phaseTime=0;particles=[];buffer=0;coyote=0;hintTimer=0;clearInput();status.textContent='Recoge las 18 linternas y encuentra a Jorge al final.';}
+function clearInput(){Object.values(held).forEach(s=>s.clear());root.querySelectorAll('[data-key]').forEach(b=>b.classList.remove('held'));}
+function start(){if(!spritesReady)return;reset();player.facing='Right';state='play';overlay.hidden=true;pauseBtn.textContent='Ⅱ';canvas.focus({preventScroll:true});}
+function press(k,id){if(held[k].has(id))return;held[k].add(id);if(k==='up'){if(state==='play')buffer=.15;else if(state==='dialogue'){line++;if(line>=CONFIG.dialogue.length){state='celebrate';phaseTime=0;status.textContent='¡Feliz cumpleaños, Azul!';}}}}
+function pause(){if(state==='title'||state==='done')return;if(state==='paused'){state=beforePause;overlay.hidden=true;pauseBtn.textContent='Ⅱ';}else{beforePause=state;state='paused';clearInput();showOverlay('Una pequeña pausa','Las luces te esperan.','CONTINUAR',pause);pauseBtn.textContent='▶';}}
+function showOverlay(title,body,label,action){overlay.replaceChildren();let h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=title;p.textContent=body;b.textContent=label;b.className='az-btn';b.onclick=action;overlay.append(h,p,b);overlay.hidden=false;}
+root.querySelector('[data-start]').onclick=start;root.querySelector('[data-reset]').onclick=start;pauseBtn.onclick=pause;
+// Pointer input has one release path, including events outside the button.
+const movementButtons=[...root.querySelectorAll('[data-key]')];
+function releasePointer(e){
+ let active=false;
+ for(const b of movementButtons){
+  if(held[b.dataset.key].delete(e.pointerId))active=true;
+  if(!held[b.dataset.key].size)b.classList.remove('held');
+ }
+ if(active&&e.cancelable)e.preventDefault();
+}
+movementButtons.forEach(b=>{
+ b.addEventListener('pointerdown',e=>{
+  if(e.button!==0||!['play','dialogue'].includes(state))return;
+  e.preventDefault();
+  // Global release listeners still work if capture is unavailable/interrupted.
+  try{b.setPointerCapture(e.pointerId);}catch{}
+  press(b.dataset.key,e.pointerId);
+  b.classList.toggle('held',held[b.dataset.key].has(e.pointerId));
+ },{passive:false});
+ b.addEventListener('lostpointercapture',releasePointer,{passive:false});
+});
+window.addEventListener('pointerup',releasePointer,{capture:true,passive:false});
+window.addEventListener('pointercancel',releasePointer,{capture:true,passive:false});
+// Overlay buttons are created dynamically; delegation also covers pause/replay.
+root.addEventListener('pointerdown',e=>{
+ const b=e.target.closest('button');
+ if(!b||b.disabled||b.dataset.key||e.button!==0)return;
+ e.preventDefault();b.click();
+},{passive:false});
+root.addEventListener('pointerup',e=>{
+ if(e.target.closest('button')&&e.cancelable)e.preventDefault();
+},{passive:false});
+// Keep keyboard/assistive clicks (detail=0); suppress the extra pointer click.
+root.addEventListener('click',e=>{
+ if(e.target.closest('button')&&e.detail>0){e.preventDefault();e.stopImmediatePropagation();}
+},true);
+for(const type of ['contextmenu','selectstart'])root.addEventListener(type,e=>{
+ if(e.target.closest('button,canvas'))e.preventDefault();
+});
+
+const keys={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',a:'left',d:'right',w:'up',' ':'up'};
+root.addEventListener('keydown',e=>{if(e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;if(keys[e.key]){e.preventDefault();if(!e.repeat)press(keys[e.key],'keyboard:'+e.key);}if(e.key==='Enter'&&state==='dialogue'&&!e.repeat){press('up','enter');held.up.delete('enter');}if(e.key.toLowerCase()==='p'&&!e.repeat)pause();});
+window.addEventListener('keyup',e=>{if(keys[e.key])held[keys[e.key]].delete('keyboard:'+e.key);});
+window.addEventListener('blur',()=>{clearInput();if(!['title','paused','done'].includes(state))pause();});document.addEventListener('visibilitychange',()=>{if(document.hidden){clearInput();if(!['title','paused','done'].includes(state))pause();}});
+function update(dt){if(!hostActive||portrait.matches||['paused','title','done'].includes(state))return;time+=dt;phaseTime+=dt;hintTimer=Math.max(0,hintTimer-dt);
+if(state==='play'){
+ buffer=Math.max(0,buffer-dt);coyote=player.ground?.1:Math.max(0,coyote-dt);player.vx=(Number(held.right.size>0)-Number(held.left.size>0))*155;if(player.vx!==0)player.facing=player.vx<0?'Left':'Right';
+ if(buffer>0&&coyote>0){player.vy=-340;player.ground=false;coyote=0;buffer=0;}
+ let oldBottom=player.y+32;player.x=Math.max(0,Math.min(WORLD-32,player.x+player.vx*dt));player.vy+=880*dt;player.y+=player.vy*dt;player.ground=false;
+ if(player.vy>=0){let surfaces=[{x:0,y:GROUND,w:WORLD},...platforms];let landing=surfaces.filter(p=>player.x+25>p.x&&player.x+7<p.x+p.w&&oldBottom<=p.y+.5&&player.y+32>=p.y).sort((a,b)=>a.y-b.y)[0];if(landing){player.y=landing.y-32;player.vy=0;player.ground=true;}}
+ lanterns.forEach(l=>{if(!l.taken&&Math.abs(player.x+16-l.x)<23&&Math.abs(player.y+16-l.y)<29){l.taken=true;count++;status.textContent=`${count} de 18 linternas${count===18?' · ¡Busca a Jorge al final!':''}`;for(let j=0;j<9;j++)particles.push({x:l.x,y:l.y,vx:Math.cos(j*7)*40,vy:Math.sin(j*7)*40,life:.65});}});
+ if(Math.abs(player.x-END)<58){if(count===18){state='dialogue';phaseTime=0;clearInput();status.textContent='Jorge tiene algo que decirte. Pulsa ▲ o Enter para continuar.';}else{hintTimer=2;}}
+}else if(state==='celebrate'&&phaseTime>4.5){state='credits';phaseTime=0;clearInput();}else if(state==='credits'&&phaseTime>creditsLayout.duration){state='done';showOverlay('Gracias por llegar hasta aquí ♡','Las mejores aventuras se comparten.','VOLVER A JUGAR',start);root.dispatchEvent(new CustomEvent('azul:complete',{bubbles:true,detail:{lanterns:count}}));}
+camera=Math.max(0,Math.min(WORLD-W,player.x-220));particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;});particles=particles.filter(p=>p.life>0);
+}
+function background(){rect(0,0,W,H,'#0e1826');stars.forEach((s,i)=>rect((s.x-camera*.12+W*2)%W,s.y,s.s,s.s,i%3?'#445c7e':'#98acc8'));rect(526-camera*.025,36,24,24,'#a0b2cc');rect(519-camera*.025,30,22,22,'#0e1826');
+ for(let i=-1;i<12;i++){let x=i*90-(camera*.22%90);rect(x,186+(i%3)*12,70,130,'#132338');rect(x+12,168+(i%3)*12,42,30,'#132338');}
+ for(let i=-1;i<16;i++){let x=i*65-(camera*.4%65);rect(x,252,48,60,'#172942');rect(x+14,224,23,35,'#172942');}
+ rect(0,GROUND,W,54,'#132237');rect(0,GROUND,W,4,'#5675a0');rect(0,GROUND+4,W,5,'#20395c');for(let i=0;i<45;i++)rect(i*23-(camera%23),GROUND+18+(i%3)*11,6,3,'#1b304e');}
+function wrap(s,max){let lines=[],r='';for(const word of s.split(' ')){if((r+word).length>max){lines.push(r.trim());r='';}r+=word+' ';}if(r)lines.push(r.trim());return lines;}
+
+// Wrap credits to their actual Canvas width; speaker labels repeat for each turn.
+function buildCredits(){
+ const rows=[];let y=0,words=0;
+ const add=(value,size,color)=>{
+  ctx.font=`${size}px monospace`;let line='';
+  for(const word of value.split(/\s+/)){
+   const next=line?line+' '+word:word;
+   if(line&&ctx.measureText(next).width>520){rows.push({value:line,y,size,color});y+=size+7;line=word;}else line=next;
+  }
+  if(line){rows.push({value:line,y,size,color});y+=size+7;}
+ };
+ for(const block of CONFIG.credits){
+  words+=block.lines.join(' ').split(/\s+/).length;
+  if(block.kind==='dialogue'){
+   const color=block.speaker==='Jorge'?'#a8d4ff':'#a6e8cd';
+   add(block.speaker.toUpperCase(),11,color);y+=7;
+   block.lines.forEach(line=>add(line,14,color));
+  }else if(block.kind==='credit'){
+   add(block.lines[0],11,'#91a7c6');y+=8;
+   block.lines.slice(1).forEach(line=>add(line,15,'#e0e8f4'));
+  }else block.lines.forEach(line=>add(line,14,'#e0e8f4'));
+  y+=46;
+ }
+ const distance=H+y, duration=Math.max(words/2.6+CONFIG.credits.length*.5,distance/18);
+ return {rows,duration,speed:distance/duration};
+}
+const creditsLayout=buildCredits();
+
+function draw(){root.dataset.state=state;ctx.imageSmoothingEnabled=false;background();
+ platforms.forEach(p=>{let x=p.x-camera;if(x>-p.w&&x<W){rect(x,p.y,p.w,5,'#7c95b8');rect(x,p.y+5,p.w,10,'#364964');rect(x+4,p.y+15,p.w-8,4,'#1a2e49');for(let j=8;j<p.w;j+=20)rect(x+j,p.y+7,7,3,'#465f83');}});
+ lanterns.forEach((l,i)=>{if(!l.taken)lamp(l.x-camera,l.y+Math.sin(time*2+i)*2);});
+ const ending=['celebrate','credits','done'].includes(state)||(state==='paused'&&['celebrate','credits'].includes(beforePause));let hop=ending&&phaseTime<4.5?Math.max(0,Math.sin(phaseTime*7))*17:0;
+ const direction=player.facing||'Right';
+ sprite(ending?'jorgeJoy':'jorgeIdle',END-camera,GROUND-32-hop);
+ sprite(ending?'azulJoy':(!player.ground?'azulJump':'azul')+direction,player.x-camera,player.y-hop);
+ if(ending)cake(END-camera-15,GROUND-37-hop);
+ particles.forEach(p=>rect(p.x-camera,p.y,2,2,'#ffcd90'));
+ rect(12,12,126,30,'#0b1420e8');lamp(27,27,true);text(`${String(count).padStart(2,'0')} / 18`,42,32,14);
+ if(state==='play'&&player.x<140)text('SIGUE LAS LUCES →',185,185,10,'#a1b3cd','center');
+ if(hintTimer>0){rect(365,243,256,33,'#0c1522');text(`Aún faltan ${18-count}. Te espero aquí.`,492,264,11,'#dae1eb','center');}
+ if(state==='dialogue'||state==='paused'&&beforePause==='dialogue'){
+ rect(18,224,604,120,'#0c1521f5');rect(18,224,604,2,'#758fb4');text('JORGE',34,246,11,'#a0b7d6');wrap(CONFIG.dialogue[line]||'',65).forEach((s,i)=>text(s,34,268+i*17,12));text('▲ / ENTER · CONTINUAR',603,330,10,'#9baec9','right');}
+ if(state==='celebrate')text('¡FELIZ CUMPLEAÑOS, AZUL!',W/2,125,21,'#f0c3d4','center');
+ if(state==='credits'||state==='done'||state==='paused'&&beforePause==='credits'){
+ rect(0,0,W,H,'#0b131f');
+ ctx.save();ctx.beginPath();ctx.rect(0,52,W,H-64);ctx.clip();
+ const offset=H-phaseTime*creditsLayout.speed;
+ for(const row of creditsLayout.rows){const y=offset+row.y;if(y>40&&y<H+20)text(row.value,W/2,y,row.size,row.color,'center');}
+ ctx.restore();
+} 
+}
+function frame(ms){if(!hostActive){last=ms;acc=0;requestAnimationFrame(frame);return;}let delta=Math.min((ms-last)/1000||0,.05);last=ms;acc+=delta;while(acc>=1/120){update(1/120);acc-=1/120;}draw();requestAnimationFrame(frame);}
+reset();status.textContent='18 linternas. Una sorpresa.';requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

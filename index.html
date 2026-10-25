@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#03070e"><meta name="description" content="Un pequeño regalo, con mucho cariño."><title>Para ti · Azul</title><link rel="stylesheet" href="style.css?v=game-expanded-2"></head>
+<body>
+<div id="stars" aria-hidden="true"></div>
+<main>
+<section id="intro" class="screen"><span class="intro-lantern" aria-hidden="true"><img src="assets/lantern.png" alt="" width="1101" height="1428"></span><div class="center"><p id="greeting" class="poetry" aria-live="polite"></p><button id="continue" class="quiet" hidden>Continuar <span>✧</span></button></div><div class="signature">UN PEQUEÑO REGALO, SOLO PARA TI</div></section>
+<section id="question" class="screen" hidden><div class="center"><p class="small-poetry">Antes de continuar,<br>necesito preguntarte algo.</p><h1>¿Te acuerdas<br>de las flores?</h1><div class="choices"><button class="quiet" data-answer="yes">🌸 &nbsp; Sí</button><button class="quiet" data-answer="no">No estoy segura</button></div></div></section>
+<section id="code" class="screen" hidden><div class="center"><p id="answer" class="explain"></p><h1>Hay algo ahí en esas dedicatorias</h1><label for="letters">Introdúcelas en su debido orden.</label><input id="letters" aria-describedby="code-error" type="text" maxlength="3" placeholder="···" autocomplete="off" autocapitalize="characters" spellcheck="false"><p id="code-error" role="status"></p><span class="code-hearts" role="img" aria-label="Tres corazones azules">💙 💙 💙</span></div></section>
+<section id="reveal" class="screen" hidden><div class="center"><p id="reveal-text" class="poetry" aria-live="polite"></p></div></section>
+<div id="journey" hidden>
+<section class="threshold"><div><h1>Entonces ya<br>podemos continuar.</h1><span class="scroll-hint" role="img" aria-label="Desliza hacia abajo"><span aria-hidden="true">⌄</span></span></div></section>
+<section class="landscape" aria-label="Un viaje entre lámparas"><div class="journey-sky" aria-hidden="true"></div><div class="scene-art"><img src="assets/rapunzel-final.png" alt="Un cielo de linternas sobre un barco y sus reflejos en el lago nocturno" width="472" height="2048" decoding="async"></div><div class="mist" aria-hidden="true"></div><header class="journey-heading"><h2>Algunas linternas guardan palabras</h2><p>Toca las linternas. Tómate tu tiempo.</p></header>
+<button class="lantern" data-message="0" style="--lamp-index:0;--lamp-x:30%;animation-delay:-0.0s" aria-label="Abrir la primera linterna"><span><img src="assets/lantern.png" alt="" width="1101" height="1428"></span></button>
+<button class="lantern" data-message="1" style="--lamp-index:1;--lamp-x:68%;animation-delay:-0.8s" aria-label="Abrir la segunda linterna"><span><img src="assets/lantern.png" alt="" width="1101" height="1428"></span></button>
+<button class="lantern" data-message="2" style="--lamp-index:2;--lamp-x:38%;animation-delay:-1.6s" aria-label="Abrir la tercera linterna"><span><img src="assets/lantern.png" alt="" width="1101" height="1428"></span></button>
+<button class="lantern" data-message="3" style="--lamp-index:3;--lamp-x:70%;animation-delay:-2.4000000000000004s" aria-label="Abrir la cuarta linterna"><span><img src="assets/lantern.png" alt="" width="1101" height="1428"></span></button>
+<button class="lantern" data-message="4" style="--lamp-index:4;--lamp-x:29%;animation-delay:-3.2s" aria-label="Abrir la quinta linterna"><span><img src="assets/lantern.png" alt="" width="1101" height="1428"></span></button>
+<button class="lantern" data-message="5" style="--lamp-index:5;--lamp-x:66%;animation-delay:-4.0s" aria-label="Abrir la sexta linterna"><span><img src="assets/lantern.png" alt="" width="1101" height="1428"></span></button>
+<button class="lantern" data-message="6" style="--lamp-index:6;--lamp-x:42%;animation-delay:-4.800000000000001s" aria-label="Abrir la séptima linterna"><span><img src="assets/lantern.png" alt="" width="1101" height="1428"></span></button>
+<button class="secret secret-star" data-secret="star" aria-label="Explorar una estrella">✧</button><button class="secret secret-lamp" data-secret="lamp" aria-label="Explorar una lámpara lejana"><img src="assets/lantern.png" alt="" width="1101" height="1428"></button><button class="secret secret-flower" data-secret="flower" aria-label="Explorar una flor"><span aria-hidden="true">✿</span></button><button class="secret secret-pascal" data-secret="pascal" aria-label="Encontrar a Pascal"><img src="assets/pascal.png" alt="" width="1386" height="1135"></button>
+<div class="ending-gate"><p id="progress" aria-live="polite">Siete linternas, siete pequeñas dedicatorias.</p><button id="gift" class="quiet" hidden>Una última sorpresa <span>✧</span></button></div></section>
+<section id="finale" hidden><h2>¡Feliz cumpleaños,<br><em>Azul!</em></h2><div class="photos"><figure><img class="photo-garland" src="assets/paper-garland.png" alt="" aria-hidden="true" width="2172" height="724" loading="lazy"><img class="bouquet-photo" src="assets/flowers-collage.png" alt="Collage de flores amarillas y ramos con rosas rosadas" width="1080" height="1350" loading="lazy"><figcaption>¡Feliz</figcaption></figure><figure><img class="photo-garland" src="assets/paper-garland.png" alt="" aria-hidden="true" width="2172" height="724" loading="lazy"><img class="birthday-photo" src="assets/azulita-birthday-v2.png" alt="Collage de cumpleaños de Azul con una foto de pequeña y decoraciones azules" width="1080" height="1350" loading="lazy" decoding="async"><figcaption>Cumpleaños</figcaption></figure><figure><img class="photo-garland" src="assets/paper-garland.png" alt="" aria-hidden="true" width="2172" height="724" loading="lazy"><img class="bouquet-photo" src="assets/autumn-bouquet-v2.png" alt="Collage otoñal con un ramo naranja, calabazas, hojas y un libro" width="1080" height="1350" loading="lazy" decoding="async"><figcaption>Azul!</figcaption></figure></div><p class="closing">Espero que hoy recibas un poquito de toda la alegría que mereces. <span>Gracias por llegar hasta aquí. ♡</span></p><footer>HECHO CON CARIÑO · PARA AZUL</footer></section>
+</div></main>
+<button id="sound" hidden aria-label="Silenciar música" aria-pressed="true">♫ <span>Sonido</span></button>
+
+<dialog id="spotify-modal" aria-labelledby="spotify-title" aria-describedby="spotify-note">
+<button class="spotify-close" type="button" aria-label="Cerrar ventana" autofocus>×</button>
+<p id="spotify-title">¿Una canción?</p>
+<p id="spotify-note"></p>
+<img id="spotify-code" alt="" width="800" height="201">
+</dialog>
+<dialog id="game-modal" aria-label="Una pequeña aventura">
+<button id="game-close" type="button" aria-label="Cerrar minijuego" autofocus>×</button>
+<iframe id="game-frame" title="18 luces para Azul: minijuego de cumpleaños" data-src="game/index.html?v=expanded-2" allow="autoplay" tabindex="0"></iframe>
+</dialog>
+<audio id="piano" src="assets/piano-final.mp3" preload="auto" loop></audio>
+<script src="app.js?v=lantern-texts-20261025"></script><script src="game-modal.js?v=1"></script></body></html>
